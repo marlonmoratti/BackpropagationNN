@@ -27,7 +27,7 @@ class NeuralNetwork:
         self.history = {'epoch': [], 'loss': []}
 
         self.activation = F.sigmoid
-        self.criterion = F.mse
+        self.criterion = F.log_loss
 
     def fit(self, x, y):
         self._initialize_weights(x.shape[1], y.shape[1])
@@ -76,14 +76,14 @@ class NeuralNetwork:
 
     def _backward(self, targets):
         output_activation = self.layer_activations[-1]
-        output_delta = (output_activation - targets) * (output_activation * (1 - output_activation))
+        output_delta = self.criterion(output_activation, targets, True) * self.activation(output_activation, True, True)
 
         deltas = [output_delta]
 
         for i in range(len(self.hidden_layer_sizes)):
             layer_activation = self.layer_activations[-(i + 2)]
             weight = self.layer_weights[-(i + 1)]
-            delta = np.dot(deltas[i], weight[1:].T) * (layer_activation * (1 - layer_activation))
+            delta = np.dot(deltas[i], weight[1:].T) * self.activation(layer_activation, True, True)
             deltas.append(delta)
 
         for activation, delta, weight in zip(self.layer_activations, deltas[::-1], self.layer_weights):
