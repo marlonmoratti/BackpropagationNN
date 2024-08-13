@@ -3,7 +3,7 @@ from source.NeuralNetwork import NeuralNetwork
 
 import matplotlib.pyplot as plt
 
-nn = NeuralNetwork(hidden_layer_sizes=(100,), learning_rate=0.1, max_iter=10000, shuffle=True)
+nn = NeuralNetwork(hidden_layer_sizes=(100,), learning_rate=0.001, max_iter=1000, shuffle=True)
 
 # x = np.random.randn(1024, 2)
 # y = np.random.randint(0, 1 + 1, (1024, 1))

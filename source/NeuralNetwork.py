@@ -1,33 +1,37 @@
 from data import Dataset, DataLoader
 import functional as F
 import numpy as np
+import utils as ut
 
 class NeuralNetwork:
     def __init__(self,
                  hidden_layer_sizes=(100,),
+                 activation='ReLU',
+                 out_activation='sigmoid',
+                 criterion='log_loss',
                  batch_size=32,
                  learning_rate=1e-3,
                  max_iter=200,
                  shuffle=True,
                  random_state=None):
-        
+
+        ut.check_attribute(F, activation)
+        ut.check_attribute(F, out_activation)
+        ut.check_attribute(F, criterion)
+
         self.hidden_layer_sizes = hidden_layer_sizes
+        self.activation = getattr(F, activation)
+        self.out_activation = getattr(F, out_activation)
+        self.criterion = getattr(F, criterion)
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.max_iter = max_iter
         self.shuffle = shuffle
-        self.random = (
-            random_state
-            if isinstance(random_state, np.random.RandomState) else
-            np.random.RandomState(random_state)
-        )
+        self.random = ut.init_random_state(random_state)
 
         self.layer_weights = []
         self.layer_activations = []
         self.history = {'epoch': [], 'loss': []}
-
-        self.activation = F.sigmoid
-        self.criterion = F.log_loss
 
     def fit(self, x, y):
         self._initialize_weights(x.shape[1], y.shape[1])
@@ -60,7 +64,6 @@ class NeuralNetwork:
             loss = self.criterion(outputs, targets)
 
             self._backward(targets)
-
             running_loss += loss * inputs.shape[0]
         
         avg_loss = running_loss / len(dataloader.dataset)
@@ -68,15 +71,18 @@ class NeuralNetwork:
 
     def _forward(self, x):
         self.layer_activations = [x]
-        for w in self.layer_weights:
+
+        activations = [self.activation] * (len(self.layer_weights) - 1) + [self.out_activation]
+        for activation, w in zip(activations, self.layer_weights):
             x = self._add_bias_term(x)
-            x = self.activation(np.dot(x, w))
+            x = activation(np.dot(x, w))
             self.layer_activations.append(x)
+
         return x
 
     def _backward(self, targets):
         output_activation = self.layer_activations[-1]
-        output_delta = self.criterion(output_activation, targets, True) * self.activation(output_activation, True, True)
+        output_delta = self.criterion(output_activation, targets, True) * self.out_activation(output_activation, True, True)
 
         deltas = [output_delta]
 

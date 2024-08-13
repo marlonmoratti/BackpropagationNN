@@ -1,4 +1,5 @@
 import numpy as np
+import utils as ut
 
 class Dataset:
     def __init__(self, inputs, targets):
@@ -16,11 +17,7 @@ class DataLoader:
         self.dataset = dataset
         self.batch_size = batch_size
         self.shuffle = shuffle
-        self.random = (
-            random_state
-            if isinstance(random_state, np.random.RandomState) else
-            np.random.RandomState(random_state)
-        )
+        self.random = ut.init_random_state(random_state)
 
     def __len__(self):
         return int(np.ceil(len(self.dataset) / self.batch_size))
