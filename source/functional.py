@@ -21,6 +21,6 @@ def mse_loss(input, target, derivative=False, *args):
     error = (input - target).flatten()
     return np.dot(error, error) / len(error)
 
-def log_loss(input, target, derivative=False, *args):
-    if derivative: return (input - target) / (input * (1 - input))
-    return -np.mean(target * np.log(input) + (1 - target) * np.log(1 - input))
+def log_loss(input, target, derivative=False, eps=1e-15, *args):
+    if derivative: return (input - target) / ((input * (1 - input)) + eps)
+    return -np.mean(target * np.log(input + eps) + (1 - target) * np.log(1 - input + eps))
