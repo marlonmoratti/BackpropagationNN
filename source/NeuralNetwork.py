@@ -8,7 +8,7 @@ class NeuralNetwork:
                  hidden_layer_sizes=(100,),
                  activation='ReLU',
                  out_activation='sigmoid',
-                 criterion='log_loss',
+                 criterion='ce_loss',
                  batch_size=32,
                  learning_rate=1e-3,
                  max_iter=200,
@@ -34,7 +34,7 @@ class NeuralNetwork:
         self.history = {'epoch': [], 'loss': []}
 
     def fit(self, x, y):
-        self._initialize_weights(x.shape[1], y.shape[1])
+        self._initialize_weights(x, y)
 
         self.history = {'epoch': [], 'loss': []}
 
@@ -50,7 +50,9 @@ class NeuralNetwork:
     def predict(self, x):
         return self._forward(x)
 
-    def _initialize_weights(self, input_size, output_size):
+    def _initialize_weights(self, x, y):
+        input_size, output_size = x.shape[1], np.max(y) + 1
+
         layer_sizes = [input_size, *self.hidden_layer_sizes, output_size]
         self.layer_weights = [
             self.random.randn(layer_sizes[i - 1] + 1, layer_sizes[i])

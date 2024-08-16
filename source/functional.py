@@ -16,11 +16,10 @@ def ReLU(x, derivative=False, *args):
         return np.where(x >= 0, 1, 0)
     return np.maximum(0, x)
 
-def mse_loss(input, target, derivative=False, *args):
-    if derivative: return (input - target)
-    error = (input - target).flatten()
-    return np.dot(error, error) / len(error)
+def ce_loss(input, target, derivative=False, eps=1e-15, *args):
+    target = np.eye(input.shape[1])[target.flatten()]
 
-def log_loss(input, target, derivative=False, eps=1e-15, *args):
-    if derivative: return (input - target) / ((input * (1 - input)) + eps)
-    return -np.mean(target * np.log(input + eps) + (1 - target) * np.log(1 - input + eps))
+    if derivative:
+        return (input - target) / ((input * (1 - input)) + eps)
+
+    return -np.mean(np.sum(target * np.log(input + eps), axis=1))
