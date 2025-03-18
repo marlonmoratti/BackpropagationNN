@@ -2,6 +2,7 @@ from data import Dataset, DataLoader
 import functional as F
 import numpy as np
 import utils as ut
+from tqdm import tqdm
 
 class NeuralNetwork:
     def __init__(self,
@@ -40,7 +41,7 @@ class NeuralNetwork:
 
         dataloader = DataLoader(Dataset(x, y), self.batch_size, self.shuffle, self.random)
         for epoch in range(self.max_iter):
-            loss = self._train_epoch(dataloader)
+            loss = self._train_epoch(dataloader, epoch, self.max_iter)
 
             self.history['epoch'].append(epoch + 1)
             self.history['loss'].append(loss)
@@ -59,14 +60,20 @@ class NeuralNetwork:
             for i in range(1, len(layer_sizes))
         ]
 
-    def _train_epoch(self, dataloader):
-        running_loss = 0
-        for inputs, targets in dataloader:
-            outputs = self._forward(inputs)
-            loss = self.criterion(outputs, targets)
+    def _train_epoch(self, dataloader, epoch, max_epoch):
+        running_loss = 0.0
+        total = 0
 
-            self._backward(targets)
-            running_loss += loss * inputs.shape[0]
+        with tqdm(dataloader, desc=f'[ Training ][ Epoch: {epoch:02d}/{max_epoch:02d}, Loss: ?? ]') as loader:
+            for inputs, targets in loader:
+                outputs = self._forward(inputs)
+                loss = self.criterion(outputs, targets)
+
+                self._backward(targets)
+                running_loss += loss * inputs.shape[0]
+                total += inputs.shape[0]
+
+                loader.set_description(f'[ Training ][ Epoch: {epoch + 1:02d}/{max_epoch:02d}, Loss: {running_loss/total:.4f} ]')
         
         avg_loss = running_loss / len(dataloader.dataset)
         return avg_loss

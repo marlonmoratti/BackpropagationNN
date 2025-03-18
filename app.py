@@ -8,7 +8,7 @@ import numpy as np
 nn = NeuralNetwork(
     hidden_layer_sizes=(200,),
     learning_rate=0.001,
-    max_iter=100,
+    max_iter=20,
     shuffle=True,
     random_state=42
 )
@@ -20,7 +20,10 @@ y = y.reshape(-1, 1)
 nn.fit(x, y)
 
 y_pred = np.argmax(nn.predict(x), axis=1)
-print(balanced_accuracy_score(y, y_pred))
+print('Balanced Accuracy in the digits dataset:', balanced_accuracy_score(y, y_pred))
 
 plt.plot(nn.history['epoch'], nn.history['loss'])
+plt.title('Loss Curve')
+plt.ylabel('Loss')
+plt.xlabel('Epochs')
 plt.show()
